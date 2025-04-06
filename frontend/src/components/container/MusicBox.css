@@ -1,0 +1,62 @@
+.music-box {
+  width: 100%;
+  background-color: white;
+  border-radius: 10px;
+  border: 1px solid #dbe4e6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* This is fine - keeps everything inside the box */
+  text-align: center;
+  transition: transform 0.5s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.music-image {
+  height: 200px;
+  overflow: hidden; /* This is important - it will contain the scaled image */
+  position: relative;
+}
+
+.music-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Maintains aspect ratio while filling container */
+  transition: transform 0.3s ease, filter 0.3s ease;
+
+  transform-origin: center;
+  image-rendering: -webkit-optimize-contrast; /* For Webkit browsers */
+  image-rendering: crisp-edges; /* For other browsers */
+}
+
+/* The scale is applied to the image, not the box */
+.music-box:hover .music-image img {
+  transform: scale(1.05);
+  filter: blur(0.5px);
+}
+
+.music-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgb(0, 34, 77, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+
+.music-box:hover .music-overlay {
+  opacity: 1;
+}
+
+.music-overlay-title {
+  color: rgb(255, 32, 78);
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  font-weight: bold;
+}

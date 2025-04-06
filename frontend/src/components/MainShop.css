@@ -1,0 +1,104 @@
+.main-shop-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.main-shop-container::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg,
+      #ff204e 0%,
+      #a0153e 20%,
+      #5d0e41 40%,
+      #00224d 60%,
+      #5d0e41 80%,
+      #ff204e 100%);
+  background-size: 600% 600%;
+  z-index: -1;
+  animation: gradientFlow 8s ease infinite;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.music-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Small tablets */
+@media (max-width: 768px) {
+  .music-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .main-shop-container {
+    min-height: 70vh;
+  }
+}
+
+/* Large phones */
+@media (max-width: 576px) {
+  .music-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+  }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+  .music-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .main-shop-container {
+    min-height: 60vh;
+    padding: 10px 5px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 375px) {
+  .music-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 320px) {
+  .music-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .main-shop-container {
+    min-height: 50vh;
+    padding: 5px;
+  }
+}

@@ -1,0 +1,25 @@
+.filter {
+  background-color: var(--filter-bg);
+  color: var(--filter-text);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all var(--transition-duration);
+}
+
+.filter select,
+.filter button {
+  background-color: var(--filter-bg);
+  color: var(--filter-text);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-duration);
+}
+
+.filter select:hover,
+.filter button:hover {
+  border-color: var(--text-color);
+  opacity: 0.8;
+} 
