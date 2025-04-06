@@ -1,0 +1,242 @@
+@model BackENDiTEC.Models.Order
+@{
+    ViewData["Title"] = Model?.Id > 0 ? "Edit Order" : "Create Order";
+}
+
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
+
+    <form asp-action="SaveOrder" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="UserId" />
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label asp-for="OrderNumber" class="form-label">Order Number</label>
+                    <input asp-for="OrderNumber" class="form-control" required />
+                    <span asp-validation-for="OrderNumber" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="OrderDate" class="form-label">Order Date</label>
+                    <input asp-for="OrderDate" class="form-control" type="datetime-local" required />
+                    <span asp-validation-for="OrderDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Status" class="form-label">Status</label>
+                    <select asp-for="Status" class="form-select" required>
+                        <option value="">Select Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="PaymentMethod" class="form-label">Payment Method</label>
+                    <select asp-for="PaymentMethod" class="form-select">
+                        <option value="">Select Payment Method</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                    <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label asp-for="ShippingAddress" class="form-label">Shipping Address</label>
+                    <textarea asp-for="ShippingAddress" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="BillingAddress" class="form-label">Billing Address</label>
+                    <textarea asp-for="BillingAddress" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="BillingAddress" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Notes" class="form-label">Notes</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <h4>Order Items</h4>
+                <div id="orderItems">
+                    @if (Model?.OrderItems != null)
+                    {
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <div class="row mb-3 order-item">
+                                <input type="hidden" name="OrderItems.Index" value="@item.Id" />
+                                <div class="col-md-4">
+                                    <select name="OrderItems[@item.Id].ProductId" class="form-select product-select" required>
+                                        <option value="">Select Product</option>
+                                        @foreach (var product in ViewBag.Products ?? new List<BackENDiTEC.Models.Product>())
+                                        {
+                                            <option value="@product.Id" selected="@(product.Id == item.ProductId)">
+                                                @product.Name
+                                            </option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" name="OrderItems[@item.Id].Quantity" 
+                                           value="@item.Quantity" class="form-control quantity-input" 
+                                           min="1" required placeholder="Quantity" />
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" name="OrderItems[@item.Id].UnitPrice" 
+                                           value="@item.UnitPrice" class="form-control unit-price" 
+                                           step="0.01" required readonly />
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="number" name="OrderItems[@item.Id].TotalPrice" 
+                                           value="@item.TotalPrice" class="form-control total-price" 
+                                           step="0.01" required readonly />
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger remove-item">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" id="addItem" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i> Add Item
+                </button>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label asp-for="TotalAmount" class="form-label">Total Amount</label>
+                    <input asp-for="TotalAmount" class="form-control" readonly />
+                    <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-4">
+            <button type="submit" class="btn btn-primary">Save Order</button>
+            <a asp-action="Orders" class="btn btn-secondary">Back to List</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const orderItems = document.getElementById('orderItems');
+            const addItemBtn = document.getElementById('addItem');
+            let itemIndex = @(Model?.OrderItems?.Count ?? 0);
+
+            function updateTotalPrice(row) {
+                const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+                const unitPrice = parseFloat(row.querySelector('.unit-price').value) || 0;
+                const totalPrice = quantity * unitPrice;
+                row.querySelector('.total-price').value = totalPrice.toFixed(2);
+                updateOrderTotal();
+            }
+
+            function updateOrderTotal() {
+                const totalPrices = [...document.querySelectorAll('.total-price')]
+                    .map(input => parseFloat(input.value) || 0);
+                const orderTotal = totalPrices.reduce((sum, price) => sum + price, 0);
+                document.getElementById('TotalAmount').value = orderTotal.toFixed(2);
+            }
+
+            function createNewRow() {
+                const row = document.createElement('div');
+                row.className = 'row mb-3 order-item';
+                row.innerHTML = `
+                    <input type="hidden" name="OrderItems.Index" value="${itemIndex}" />
+                    <div class="col-md-4">
+                        <select name="OrderItems[${itemIndex}].ProductId" class="form-select product-select" required>
+                            <option value="">Select Product</option>
+                            @foreach (var product in ViewBag.Products ?? new List<BackENDiTEC.Models.Product>())
+                            {
+                                <option value="@product.Id" data-price="@product.Price">@product.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="OrderItems[${itemIndex}].Quantity" 
+                               class="form-control quantity-input" min="1" required placeholder="Quantity" />
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="OrderItems[${itemIndex}].UnitPrice" 
+                               class="form-control unit-price" step="0.01" required readonly />
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="OrderItems[${itemIndex}].TotalPrice" 
+                               class="form-control total-price" step="0.01" required readonly />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger remove-item">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+
+                const productSelect = row.querySelector('.product-select');
+                const quantityInput = row.querySelector('.quantity-input');
+                const unitPriceInput = row.querySelector('.unit-price');
+                const removeBtn = row.querySelector('.remove-item');
+
+                productSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const price = selectedOption.getAttribute('data-price');
+                    unitPriceInput.value = price;
+                    updateTotalPrice(row);
+                });
+
+                quantityInput.addEventListener('input', () => updateTotalPrice(row));
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    updateOrderTotal();
+                });
+
+                orderItems.appendChild(row);
+                itemIndex++;
+            }
+
+            addItemBtn.addEventListener('click', createNewRow);
+
+            // Initialize existing rows
+            document.querySelectorAll('.order-item').forEach(row => {
+                const productSelect = row.querySelector('.product-select');
+                const quantityInput = row.querySelector('.quantity-input');
+                const removeBtn = row.querySelector('.remove-item');
+
+                productSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const price = selectedOption.getAttribute('data-price');
+                    row.querySelector('.unit-price').value = price;
+                    updateTotalPrice(row);
+                });
+
+                quantityInput.addEventListener('input', () => updateTotalPrice(row));
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    updateOrderTotal();
+                });
+            });
+        });
+    </script>
+}

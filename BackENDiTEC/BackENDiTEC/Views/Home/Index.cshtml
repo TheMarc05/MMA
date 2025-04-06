@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Music Style</h1>
+    <p>User email : @ViewData["UserID"]</p>
+    <a asp-controller="Home" asp-action="Swagger" class="btn btn-primary mb-3">API</a>
+    <br/>
+    <div style="display-4">
+        <a asp-controller="Home" asp-action="Products" class="btn btn-secondary mb-3">Products</a>
+        <a asp-controller="Home" asp-action="Orders" class="btn btn-secondary mb-3">Orders</a>
+    </div>
+</div>

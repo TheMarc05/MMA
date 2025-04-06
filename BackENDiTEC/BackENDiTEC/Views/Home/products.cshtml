@@ -1,0 +1,147 @@
+@model IEnumerable<BackENDiTEC.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+}
+
+<style>
+    .product-image-container {
+        position: relative;
+        width: 50px;
+        height: 50px;
+    }
+
+    .product-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-image-hover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-image-container:hover .product-image {
+        opacity: 0;
+    }
+
+    .product-image-container:hover .product-image-hover {
+        opacity: 1;
+    }
+</style>
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Products</h2>
+        <a asp-action="productsCreateEdit" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Product
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light text-dark">
+                <tr>
+                    <th class="text-center">Image</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Price</th>
+                    <th class="text-center">Style</th>
+                    <th class="text-center">Material</th>
+                    <th class="text-center">Color</th>
+                    <th class="text-center">Stock (XS/S/M/L/XL)</th>
+                    <th class="text-center">Shoe Size</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="product-image-container">
+                                <img src="@item.ImageUrl" alt="@item.Name" class="product-image" />
+                                @if (!string.IsNullOrEmpty(item.HoverImageUrl))
+                                {
+                                    <img src="@item.HoverImageUrl" alt="@item.Name (hover)" class="product-image-hover" />
+                                }
+                            </div>
+                        </td>
+                        <td>@item.Name</td>
+                        <td>@item.Price.ToString("C")</td>
+                        <td>@item.ProductStyle</td>
+                        <td>@item.Material</td>
+                        <td>@item.Color</td>
+                        <td>@item.XS/@item.S/@item.M/@item.L/@item.XL</td>
+                        <td>@item.ShoeSize</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a asp-action="productsCreateEdit" asp-route-id="@item.Id" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal" 
+                                        data-product-id="@item.Id"
+                                        data-product-name="@item.Name">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <span id="productNameToDelete"></span>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" asp-action="DeleteProduct" method="post">
+                    <input type="hidden" id="productIdToDelete" name="id" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var deleteModal = document.getElementById('deleteModal');
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var productId = button.getAttribute('data-product-id');
+                var productName = button.getAttribute('data-product-name');
+                
+                var productNameSpan = document.getElementById('productNameToDelete');
+                var productIdInput = document.getElementById('productIdToDelete');
+                
+                productNameSpan.textContent = productName;
+                productIdInput.value = productId;
+            });
+        });
+    </script>
+}
